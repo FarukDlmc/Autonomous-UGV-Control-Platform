@@ -44,3 +44,10 @@ The system ensures synchronized, asynchronous communication between the in-vehic
           │ (WebSocket / Real-Time)
           ├──► [ Web Control Station (MVC) ]
           └──► [ C# WinForms Desktop Station ]
+
+
+<img width="1919" height="919" alt="Dashboard" src="https://github.com/user-attachments/assets/b284cf43-3ad9-446c-8ee0-c4a9022d13c0" />
+<img width="1918" height="904" alt="Control Panel" src="https://github.com/user-attachments/assets/69d07163-6812-4f86-8578-b980a19f5c58" />
+<img width="1909" height="920" alt="System Logs" src="https://github.com/user-attachments/assets/9384ece0-2c6f-4f68-a45d-29afb22778e7" />
+<img width="1917" height="911" alt="Telemetry" src="https://github.com/user-attachments/assets/f645996b-76db-4204-9126-be29ae39d333" />
+<img width="1916" height="915" alt="AI Vision" src="https://github.com/user-attachments/assets/7c708f9a-43dd-4dff-acbf-752440fafb2b" />
