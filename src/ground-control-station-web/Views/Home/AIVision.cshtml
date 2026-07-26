@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "AI Vision";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/aivision.css" asp-append-version="true" />
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+
+<div class="gcs-wrapper">
+    <header class="gcs-header">
+        <span class="header-icon">⬡</span>
+        <h1 class="header-title">AI VISION</h1>
+        <span class="header-status">
+            <span class="pulse-dot"></span>ONLINE
+        </span>
+    </header>
+
+    <main class="gcs-main">
+        <section class="feed-panel" id="feedPanel" style="position: relative; width: 100%; min-height: 500px; display: flex; justify-content: center; align-items: center; background-color: #050914; overflow: hidden; border-radius: 8px;">
+
+            <div class="feed-scanline"></div>
+            <div class="feed-corners">
+                <span class="corner tl"></span>
+                <span class="corner tr"></span>
+                <span class="corner bl"></span>
+                <span class="corner br"></span>
+            </div>
+
+            <div class="feed-placeholder" id="feedPlaceholder" style="z-index: 5;">
+                <span class="feed-icon">⬡</span>
+                <p>AWAITING STREAM INPUT</p>
+            </div>
+
+            <img id="aiStreamFeed" style="display: none; width: 1366px; height: 800px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 999999; border: 8px solid #ffcc00; background-color: #111; box-shadow: 0 0 100px rgba(0,0,0,0.9);" alt="AI Vision Stream">
+            <div class="feed-overlay-info" style="position: absolute; bottom: 10px; right: 10px; z-index: 20;">
+                <span class="oi-tag">CAM-01</span>
+                <span class="oi-tag" id="fpsOverlay">FPS: --</span>
+            </div>
+        </section>
+
+        <aside class="side-panel">
+            <div class="sys-info">
+                <div class="sys-row engine">
+                    <span class="sys-label">AI ENGINE:</span>
+                    <span class="sys-value red">YOLO</span>
+                </div>
+                <div class="sys-row hardware">
+                    <span class="sys-label">HARDWARE:</span>
+                    <span class="sys-value cyan">RASPBERRY PI 5</span>
+                </div>
+                <div class="sys-row fps-row">
+                    <span class="sys-label">FPS:</span>
+                    <span class="sys-value white" id="fpsCounter">30</span>
+                </div>
+            </div>
+
+            <div class="log-container">
+                <div class="log-header">
+                    <span>DETECTION LOG</span>
+                    <span class="log-count" id="logCount">0</span>
+                </div>
+                <div class="log-box" id="logBox">
+                    <div class="log-entry" style="color: #666;">System Ready -- ⚡</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-stream" id="streamBtn" onclick="toggleStream()">
+                    <span class="btn-icon">▶</span> START STREAM
+                </button>
+                <a href="http://10.140.82.176:5000/capture" class="btn btn-capture" target="_blank" download="balkar_yakalanan_kare.jpg" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span class="btn-icon">◉</span> CAPTURE
+                </a>
+                <button class="btn btn-bbox" id="bboxBtn" onclick="toggleBbox()">
+                    <span class="btn-icon">⬚</span> TOGGLE BBOX
+                </button>
+            </div>
+        </aside>
+    </main>
+</div>
+
+<script src="~/js/aivision.js" asp-append-version="true"></script>

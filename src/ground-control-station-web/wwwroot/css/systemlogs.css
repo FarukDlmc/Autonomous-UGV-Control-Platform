@@ -1,0 +1,394 @@
+﻿/* =============================================
+   system-logs.css  —  BALKAR GCS  |  System Logs
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+/* ── Variables ─────────────────────────────── */
+:root {
+    --bg-page: #0d1525;
+    --bg-panel: #101c30;
+    --bg-header-row: #0a1420;
+    --bg-critical-row: #1a0808;
+    --border-muted: #1e2e44;
+    --border-critical: #e5193a;
+    --border-warning: #e5a619;
+    --border-uptime: #19e56e;
+    --color-info: #19e56e;
+    --color-warning: #e5a619;
+    --color-error: #e5193a;
+    --color-critical: #ff3a5c;
+    --color-cyan: #19d4e5;
+    --color-muted: #4a6280;
+    --color-text: #c5d8ef;
+    --color-header: #19d4e5;
+    --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+    --radius: 4px;
+}
+
+/* ── Reset / Base ───────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-mono);
+    background: var(--bg-page);
+    color: var(--color-text);
+}
+
+/* ── Page Layout ────────────────────────────── */
+.logs-page {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ── LEFT — Main ────────────────────────────── */
+.logs-main {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* ── Toolbar ─────────────────────────────────── */
+.logs-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    color: var(--color-muted);
+    pointer-events: none;
+}
+
+.log-search {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-muted);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+    .log-search:focus {
+        border-color: var(--color-cyan);
+    }
+
+    .log-search::placeholder {
+        color: var(--color-muted);
+    }
+
+.level-filter {
+    padding: 8px 28px 8px 10px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-muted);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234a6280'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color 0.2s;
+}
+
+    .level-filter:focus {
+        border-color: var(--color-cyan);
+    }
+
+/* Buttons */
+.btn-export,
+.btn-clear {
+    padding: 8px 16px;
+    background: transparent;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.btn-export {
+    border: 1px solid var(--color-cyan);
+    color: var(--color-cyan);
+}
+
+    .btn-export:hover {
+        background: var(--color-cyan);
+        color: var(--bg-page);
+    }
+
+.btn-clear {
+    border: 1px solid var(--color-error);
+    color: var(--color-error);
+}
+
+    .btn-clear:hover {
+        background: var(--color-error);
+        color: #fff;
+    }
+
+/* ── Log Viewer ─────────────────────────────── */
+.log-viewer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-muted);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+/* Shared row grid */
+.log-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #30363d;
+    gap: 20px; /* Sütunlar arasına 20 piksel boşluk bırakır */
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* Header row */
+.log-header {
+    background: var(--bg-header-row);
+    border-bottom: 1px solid var(--border-muted);
+    color: var(--color-header);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* Scrollable body */
+.log-body {
+    overflow-y: auto;
+    flex: 1;
+}
+
+    .log-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .log-body::-webkit-scrollbar-track {
+        background: var(--bg-panel);
+    }
+
+    .log-body::-webkit-scrollbar-thumb {
+        background: var(--border-muted);
+        border-radius: 3px;
+    }
+
+    /* Data rows */
+    .log-body .log-row {
+        border-bottom: 1px solid rgba(30, 46, 68, 0.5);
+        transition: background 0.15s;
+    }
+
+        .log-body .log-row:hover {
+            background: rgba(25, 212, 229, 0.04);
+        }
+
+/* Critical row override */
+.log-row--critical {
+    background: var(--bg-critical-row) !important;
+}
+
+    .log-row--critical:hover {
+        background: #200a0a !important;
+    }
+
+/* Column text colors */
+.col-time {
+    min-width: 110px;
+    color: #8b949e;
+}
+
+.col-module {
+    min-width: 120px;
+    font-weight: bold;
+    color: #c9d1d9;
+}
+
+.col-level {
+    min-width: 90px;
+    font-weight: bold;
+}
+
+.col-msg {
+    flex-grow: 1; /* Mesaj kısmı kalan tüm boşluğu kaplar */
+    word-wrap: break-word;
+}
+
+.level-info {
+    color: var(--color-info);
+}
+
+.level-warning {
+    color: var(--color-warning);
+}
+
+.level-error {
+    color: var(--color-error);
+}
+
+.level-critical {
+    color: var(--color-critical);
+    font-weight: 700;
+}
+
+/* Critical row — all text in red */
+.log-row--critical .col-time,
+.log-row--critical .col-module,
+.log-row--critical .col-msg {
+    color: var(--color-critical);
+}
+
+/* Hidden (filtered out) */
+.log-row.hidden {
+    display: none;
+}
+
+/* ── RIGHT — Sidebar ─────────────────────────── */
+.logs-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 200px;
+}
+
+.panel {
+    flex: 1;
+    background: var(--bg-panel);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel--critical {
+    border: 1px solid var(--border-critical);
+}
+
+.panel--warning {
+    border: 1px solid var(--border-warning);
+}
+
+.panel--uptime {
+    border: 1px solid var(--border-uptime);
+}
+
+.panel-title {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid;
+}
+
+.panel--critical .panel-title {
+    color: var(--border-critical);
+    border-color: var(--border-critical);
+}
+
+.panel--warning .panel-title {
+    color: var(--border-warning);
+    border-color: var(--border-warning);
+}
+
+.panel--uptime .panel-title {
+    color: var(--border-uptime);
+    border-color: var(--border-uptime);
+}
+
+.panel-body {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.panel-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.stat-num {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--color-muted);
+    letter-spacing: 0.05em;
+}
+
+.panel-detail {
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    opacity: 0.85;
+}
+
+.critical-color {
+    color: var(--color-critical);
+}
+
+.warning-color {
+    color: var(--color-warning);
+}
+
+.uptime-color {
+    color: var(--color-info);
+}
+
+/* ── Responsive tweak ───────────────────────── */
+@media (max-width: 900px) {
+    .logs-page {
+        flex-direction: column;
+        height: auto;
+        overflow: auto;
+    }
+
+    .logs-sidebar {
+        flex-direction: row;
+    }
+
+    .panel {
+        flex: 1;
+    }
+}

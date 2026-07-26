@@ -1,0 +1,238 @@
+/* ============================================================
+   BALKAR GCS — site.css
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
+
+/* ── Variables ─────────────────────────────────────────────── */
+:root {
+    --bg-base: #12151f;
+    --bg-sidebar: #181c28;
+    --bg-topbar: #181c28;
+    --bg-content: #12151f;
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-active: rgba(74, 158, 255, 0.35);
+    --text-primary: #e8eaf0;
+    --text-muted: #5a6080;
+    --text-label: #9aa0b8;
+    --accent: #4a9eff;
+    --accent-glow: rgba(74, 158, 255, 0.18);
+    --accent-active: rgba(74, 158, 255, 0.12);
+    --sidebar-w: 260px;
+    --topbar-h: 44px;
+    --font-ui: 'Rajdhani', 'Segoe UI', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+}
+
+/* ── Reset / Base ───────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ── Shell ──────────────────────────────────────────────────── */
+.gcs-shell {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+.gcs-sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-subtle);
+    position: relative;
+    z-index: 10;
+}
+
+    /* subtle vertical scanline texture */
+    .gcs-sidebar::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient( 180deg, transparent 0px, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px );
+        pointer-events: none;
+    }
+
+/* Brand */
+.gcs-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    min-height: 72px;
+}
+
+.gcs-brand-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+}
+
+    .gcs-brand-icon svg {
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 0 6px rgba(74, 158, 255, 0.5));
+    }
+
+.gcs-brand-name {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.12em;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+/* Nav */
+.gcs-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    flex: 1;
+}
+
+.gcs-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 20px;
+    position: relative;
+    transition: background 0.15s ease, color 0.15s ease;
+    cursor: pointer;
+    color: var(--text-label);
+    border-left: 2px solid transparent;
+}
+
+    .gcs-nav-item:hover {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-primary);
+    }
+
+    .gcs-nav-item.active {
+        background: var(--accent-active);
+        color: var(--accent);
+        border-left-color: var(--accent);
+    }
+
+        .gcs-nav-item.active .gcs-nav-icon svg {
+            filter: drop-shadow(0 0 4px rgba(74, 158, 255, 0.6));
+        }
+
+/* Nav icon wrapper */
+.gcs-nav-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.gcs-nav-item:hover .gcs-nav-icon,
+.gcs-nav-item.active .gcs-nav-icon {
+    background: rgba(74, 158, 255, 0.15);
+    border-color: rgba(74, 158, 255, 0.3);
+}
+
+.gcs-nav-icon svg {
+    width: 16px;
+    height: 16px;
+    color: inherit;
+    transition: filter 0.15s ease;
+}
+
+/* Nav label */
+.gcs-nav-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    font-family: var(--font-ui);
+}
+
+/* ── Main area ──────────────────────────────────────────────── */
+.gcs-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* ── Top bar ────────────────────────────────────────────────── */
+.gcs-topbar {
+    height: var(--topbar-h);
+    min-height: var(--topbar-h);
+    background: var(--bg-topbar);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.gcs-topbar-inner {
+    flex: 1;
+    /* Add top bar content here */
+}
+
+/* ── Content ────────────────────────────────────────────────── */
+.gcs-content {
+    flex: 1;
+    background: var(--bg-content);
+    overflow: auto;
+    padding: 0;
+}
+
+    /* Subtle grid overlay on content area */
+    .gcs-content::before {
+        content: '';
+        position: fixed;
+        inset: var(--topbar-h) 0 0 var(--sidebar-w);
+        background-image: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(74, 158, 255, 0.25);
+    border-radius: 3px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(74, 158, 255, 0.45);
+    }

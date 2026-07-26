@@ -1,0 +1,333 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+}
+
+<div class="gcs-dashboard">
+    <div class="gcs-page-title">
+        <span class="blink-dot"></span> BALKAR COMMAND CENTER // HUD OMNI-VIEW
+    </div>
+
+    <div class="hud-grid-top">
+        <div class="hud-stat-box border-cyan">
+            <div class="stat-label">DRIVE OVERRIDE</div>
+            <div class="stat-data">
+                <span class="icon color-cyan">🕹️</span>
+                <div class="stat-text">
+                    <div class="value toggle-mode">
+                        <span class="active color-cyan" id="mode-auto">AUTO</span>
+                        <span class="sep">/</span>
+                        <span id="mode-manual">MNL</span>
+                    </div>
+                    <div class="sub" id="mode-sub">AI VISION CONTROL</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-stat-box border-green">
+            <div class="stat-label">TELEMETRY SPEED</div>
+            <div class="stat-data">
+                <span class="icon color-green">⚡</span>
+                <div class="stat-text">
+                    <div class="value color-green" id="speed-val">0.0 <span class="unit">m/s</span></div>
+                    <div class="sub" id="speed-sub">IDLE</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-stat-box border-yellow">
+            <div class="stat-label">LINK LATENCY</div>
+            <div class="stat-data">
+                <span class="icon color-yellow">📡</span>
+                <div class="stat-text">
+                    <div class="value color-yellow" id="latency-val">45 <span class="unit">ms</span></div>
+                    <div class="sub" id="latency-sub">SIGNALR TCP OK</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-stat-box border-red" id="obs-card">
+            <div class="stat-label">SONAR / LIDAR</div>
+            <div class="stat-data">
+                <span class="icon color-red" id="obs-icon">🛑</span>
+                <div class="stat-text">
+                    <div class="value color-red glow-text-red" id="obs-status">DETECTED</div>
+                    <div class="sub" id="obs-sub">FRONTAL SENSOR</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hud-grid-middle">
+        <div class="hud-panel">
+            <div class="panel-header">MOTOR PWM OUTPUTS (CH2/CH4)</div>
+            <div class="chart-wrapper">
+                <canvas id="pwmBarChart"></canvas>
+            </div>
+        </div>
+
+        <div class="hud-panel">
+            <div class="panel-header">SPATIAL AWARENESS RADAR</div>
+            <div class="chart-wrapper">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="hud-grid-bottom">
+        <div class="hud-panel hardware-panel">
+            <div class="panel-header">ONBOARD DIAGNOSTICS</div>
+            <div class="hw-grid">
+                <div class="hw-item">
+                    <span class="hw-key">RPi 5 CPU TEMP</span>
+                    <span class="hw-val color-cyan" id="hw-temp">45°C</span>
+                </div>
+                <div class="hw-item">
+                    <span class="hw-key">SYS LOAD</span>
+                    <span class="hw-val color-yellow" id="hw-load">75%</span>
+                </div>
+                <div class="hw-item">
+                    <span class="hw-key">PIXHAWK LINK</span>
+                    <span class="hw-val color-green">ttyACM0</span>
+                </div>
+                <div class="hw-item">
+                    <span class="hw-key">ARM STATUS</span>
+                    <span class="hw-val color-red glow-text-red">ARMED</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-panel terminal-panel">
+            <div class="panel-header">LIVE DB STREAM [PORT: 5434]</div>
+            <div class="terminal-screen" id="live-terminal">
+                <div class="log-line">> INITIATING SECURE CONNECTION... OK</div>
+                <div class="log-line">> ASP.NET CORE SIGNALR HUB... ACTIVE</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+
+<script>
+    /* =================================================================
+    GCS DASHBOARD  –  Data layer (Preserved from original)
+    ================================================================= */
+    const GCS = {
+    driveMode:      'AUTO',
+    speedMs:        0.0,
+    latencyMs:      45,
+    obstacleDetected: true,
+    systemLoadPct:  75,
+    throttle:       0
+    };
+
+    /* =================================================================
+    CHART SETUP (Cyberpunk Style)
+    ================================================================= */
+    Chart.defaults.color = '#607196';
+    Chart.defaults.font.family = "'Share Tech Mono', monospace";
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(10, 16, 29, 0.9)';
+    Chart.defaults.plugins.tooltip.borderColor = '#00f0ff';
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+    // 1. Motor PWM Bar Chart
+    const ctxBar = document.getElementById('pwmBarChart').getContext('2d');
+    const pwmBarChart = new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+    labels: ['MOTOR L', 'MOTOR R', 'STEER SVO', 'CAM TILT'],
+    datasets: [{
+    label: 'PWM SIGNAL',
+    data: [1500, 1500, 1500, 1500], // Start at neutral
+    backgroundColor: ['rgba(0, 255, 136, 0.4)', 'rgba(0, 255, 136, 0.4)', 'rgba(0, 240, 255, 0.4)', 'rgba(255, 234, 0, 0.4)'],
+    borderColor: ['#00ff88', '#00ff88', '#00f0ff', '#ffea00'],
+    borderWidth: 2
+    }]
+    },
+    options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: { y: { min: 1000, max: 2000, grid: { color: 'rgba(21, 43, 71, 0.5)' } }, x: { grid: { display: false } } },
+    plugins: { legend: { display: false } },
+    animation: { duration: 200 }
+    }
+    });
+
+    // 2. Radar Chart
+    const ctxRadar = document.getElementById('radarChart').getContext('2d');
+    const radarChart = new Chart(ctxRadar, {
+    type: 'radar',
+    data: {
+    labels: ['FRONT', 'FR-RIGHT', 'REAR-R', 'REAR', 'REAR-L', 'FR-LEFT'],
+    datasets: [{
+    label: 'Distance (cm)',
+    data: [200, 200, 200, 200, 200, 200], // Start clear
+    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+    borderColor: '#00f0ff',
+    pointBackgroundColor: '#00ff88',
+    pointBorderColor: '#fff',
+    borderWidth: 2
+    }]
+    },
+    options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: { r: { angleLines: { color: 'rgba(0, 240, 255, 0.2)' }, grid: { color: 'rgba(0, 240, 255, 0.2)' }, pointLabels: { color: '#00f0ff', font: { size: 10 } }, ticks: { display: false, min: 0, max: 200 } } },
+    plugins: { legend: { display: false } }
+    }
+    });
+
+    /* =================================================================
+    STATUS CARDS  –  Apply state to new UI elements
+    ================================================================= */
+    function applyStatus() {
+    // Drive Mode
+    const isAuto = GCS.driveMode === 'AUTO';
+    document.getElementById('mode-auto').classList.toggle('active', isAuto);
+    document.getElementById('mode-manual').classList.toggle('active', !isAuto);
+    document.getElementById('mode-sub').textContent = isAuto ? 'AI VISION CONTROL' : 'MANUAL OVERRIDE';
+
+    // Speed
+    document.getElementById('speed-val').innerHTML = GCS.speedMs.toFixed(1) + ' <span class="unit">m/s</span>';
+    document.getElementById('speed-sub').textContent = GCS.speedMs === 0 ? 'IDLE' : GCS.speedMs > 3 ? 'HIGH SPEED' : 'CRUISING';
+
+    // Latency
+    const lat = GCS.latencyMs;
+    const lcol = lat < 50 ? 'var(--gcs-green)' : lat < 100 ? 'var(--gcs-yellow)' : 'var(--gcs-red)';
+    document.getElementById('latency-val').innerHTML = lat + ' <span class="unit">ms</span>';
+    document.getElementById('latency-val').style.color = lcol;
+    document.getElementById('latency-sub').textContent = lat < 50 ? 'LINK OK' : lat < 100 ? 'DEGRADED' : 'HIGH LATENCY';
+
+    // Obstacle
+    const det = GCS.obstacleDetected;
+    const obsVal = document.getElementById('obs-status');
+    const obsIcon = document.getElementById('obs-icon');
+    const obsCard = document.getElementById('obs-card');
+
+    if (det) {
+    obsVal.textContent = 'DETECTED';
+    obsVal.className = 'value color-red glow-text-red';
+    obsIcon.textContent = '🛑';
+    obsIcon.className = 'icon color-red';
+    obsCard.className = 'hud-stat-box border-red';
+    document.getElementById('obs-sub').textContent = 'FRONTAL SENSOR';
+    } else {
+    obsVal.textContent = 'CLEAR';
+    obsVal.className = 'value color-green';
+    obsIcon.textContent = '✅';
+    obsIcon.className = 'icon color-green';
+    obsCard.className = 'hud-stat-box border-green';
+    document.getElementById('obs-sub').textContent = 'PATH CLEAR';
+    }
+
+    // System Load
+    document.getElementById('hw-load').textContent = GCS.systemLoadPct + '%';
+    document.getElementById('hw-load').className = 'hw-val ' + (GCS.systemLoadPct > 80 ? 'color-red' : GCS.systemLoadPct > 60 ? 'color-yellow' : 'color-green');
+    }
+
+    /* =================================================================
+    SIGNALR LIVE CONNECTION LAYER
+    ================================================================= */
+    const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/gcsHub")
+    .withAutomaticReconnect() // Wi-Fi koparsa otomatik geri bağlanmayı dener
+    .build();
+
+    // Hub'dan "ReceiveTelemetry" adıyla veri fırlatıldığında burası tetiklenir
+    connection.on("ReceiveTelemetry", function (payload) {
+    // 1. GCS yerel veri katmanını güncelle
+    GCS.driveMode = payload.driveMode;
+    GCS.speedMs = payload.speedMs;
+    GCS.latencyMs = payload.latencyMs;
+    GCS.obstacleDetected = payload.obstacleDetected;
+    GCS.systemLoadPct = payload.systemLoadPct;
+
+    // 2. Arayüz elemanlarını ve renkleri güncelle
+    applyStatus();
+
+    // 3. Mekanik barları ve radar grafiklerini güncelle
+    window.GcsUpdate.updatePWM(payload.motorLPwm, payload.motorRPwm, payload.steerPwm, payload.camTiltPwm);
+    window.GcsUpdate.updateRadar(payload.radarDistances);
+
+    // Donanım durum kartlarındaki diğer dinamik alanlar
+    document.getElementById('hw-temp').textContent = payload.rpiCpuTemp.toFixed(1) + "°C";
+    document.getElementById('hw-temp').className = "hw-val " + (payload.rpiCpuTemp > 65 ? "color-red" : "color-cyan");
+    });
+
+    // Hub'dan "ReceiveLog" adıyla terminal mesajı fırlatıldığında burası tetiklenir
+    connection.on("ReceiveLog", function (message) {
+    const terminal = document.getElementById('live-terminal');
+    const timeStamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+    const newLine = document.createElement('div');
+    newLine.className = 'log-line';
+    newLine.innerText = `[${timeStamp}] ${message}`;
+
+    terminal.appendChild(newLine);
+    if (terminal.children.length > 5) {
+    terminal.removeChild(terminal.firstChild);
+    }
+    });
+
+    // Canlı hattı ateşle
+    connection.start()
+    .then(() => console.log("📡 SIGNALR HUB CONNECTION ESTABLISHED // BALKAR ONLINE"))
+    .catch(err => console.error("❌ SIGNALR CONNECTION FAILED: ", err));
+
+    // Initial Call
+    applyStatus();
+
+    /* =================================================================
+    PUBLIC API – call these from your SignalR code (Preserved)
+    ================================================================= */
+    window.GcsUpdate = {
+    speed(ms)        { GCS.speedMs = ms;              applyStatus(); },
+    latency(ms)      { GCS.latencyMs = ms;            applyStatus(); },
+    obstacle(det)    { GCS.obstacleDetected = det;    applyStatus(); },
+    mode(m)          { GCS.driveMode = m;             applyStatus(); },
+    systemLoad(pct)  { GCS.systemLoadPct = pct;       applyStatus(); },
+
+    /** Push new PWM data to the bar chart */
+    updatePWM(motorL, motorR, steer, cam) {
+    pwmBarChart.data.datasets[0].data = [motorL, motorR, steer, cam];
+    pwmBarChart.update();
+    },
+
+    /** Push new Radar data array (6 distances) */
+    updateRadar(distances) {
+    radarChart.data.datasets[0].data = distances;
+    // Change color to red if obstacle is close (<50cm)
+    const minDistance = Math.min(...distances);
+    radarChart.data.datasets[0].pointBackgroundColor = minDistance < 50 ? '#ff003c' : '#00ff88';
+    radarChart.update();
+    }
+    };
+
+    /* =================================================================
+    LIVE TERMINAL SIMULATION LOOP
+    ================================================================= */
+    const terminal = document.getElementById('live-terminal');
+    const logMessages = [
+    "> FETCHING YOLO DETECTIONS...",
+    "> BBOX: PERSON (98%) [X:320 Y:240]",
+    "> DB INSERT: TELEMETRY ROW RECORDED",
+    "> HEARTBEAT ACKNOWLEDGED",
+    "> FRAME DROP PREVENTED"
+    ];
+
+    setInterval(() => {
+    const randomLog = logMessages[Math.floor(Math.random() * logMessages.length)];
+    const timeStamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+    const newLine = document.createElement('div');
+    newLine.className = 'log-line';
+    newLine.innerText = `[${timeStamp}] ${randomLog}`;
+
+    terminal.appendChild(newLine);
+    if (terminal.children.length > 5) {
+    terminal.removeChild(terminal.firstChild);
+    }
+    }, 2000);
+</script>

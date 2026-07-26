@@ -1,0 +1,113 @@
+﻿@model IEnumerable<WebAutonomousControlStation.Models.BalkarSystemLog>
+@{
+    ViewData["Title"] = "System Logs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/systemlogs.css" />
+}
+
+<div class="logs-page">
+
+    <div class="logs-main">
+
+        <div class="logs-toolbar">
+            <div class="search-wrap">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input type="text" id="logSearch" class="log-search" placeholder="Search in logs... (Ex: Pixhawk, GPS)" />
+            </div>
+            <select id="levelFilter" class="level-filter">
+                <option value="ALL">ALL</option>
+                <option value="INFO">INFO</option>
+                <option value="WARNING">WARNING</option>
+                <option value="ERROR">ERROR</option>
+                <option value="CRITICAL">CRITICAL</option>
+            </select>
+            <button class="btn-export" id="exportCsv">EXPORT CSV</button>
+            <button class="btn-clear" id="clearLogs">CLEAR</button>
+        </div>
+
+        <div class="log-viewer">
+            <div class="log-header log-row">
+                <span>[TIME]</span>
+                <span>[MODULE]</span>
+                <span>[LEVEL]</span>
+                <span>[MESSAGE]</span>
+            </div>
+
+            <div class="log-body" id="logBody">
+                @if (Model != null)
+                {
+                    foreach (var log in Model)
+                    {
+                        string levelClass = "level-info";
+                        string rowModifier = "";
+
+                        if (log.LogLevel == "WARNING") levelClass = "level-warning";
+                        else if (log.LogLevel == "ERROR") levelClass = "level-error";
+                        else if (log.LogLevel == "CRITICAL")
+                        {
+                            levelClass = "level-critical";
+                            rowModifier = "log-row--critical";
+                        }
+
+                        <div class="log-row @rowModifier" data-level="@log.LogLevel">
+                            <span class="col-time">@log.TarihSaat.ToString("HH:mm:ss")</span>
+                            <span class="col-module">@log.Module</span>
+                            <span class="col-level @levelClass">@log.LogLevel</span>
+                            <span class="col-msg">@log.Message</span>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <aside class="logs-sidebar">
+
+        <div class="panel panel--critical">
+            <h3 class="panel-title">CRITICAL</h3>
+            <div class="panel-body">
+                <div class="panel-stat">
+                    <span class="stat-num critical-color" id="criticalCount">0</span>
+                    <span class="stat-label">Active Alerts</span>
+                </div>
+                <p class="panel-detail critical-color" id="lastCriticalMsg">No critical issues.</p>
+            </div>
+        </div>
+
+        <div class="panel panel--warning">
+            <h3 class="panel-title">WARNINGS</h3>
+            <div class="panel-body">
+                <div class="panel-stat">
+                    <span class="stat-num warning-color" id="warningCount">0</span>
+                    <span class="stat-label">Active Warnings</span>
+                </div>
+                <p class="panel-detail warning-color" id="lastWarningMsg">System stable.</p>
+            </div>
+        </div>
+
+        <div class="panel panel--uptime">
+            <h3 class="panel-title">UPTIME</h3>
+            <div class="panel-body">
+                <div class="panel-stat">
+                    <span class="stat-num uptime-color" id="uptimeDisplay">00:00:00</span>
+                    <span class="stat-label">hh:mm:ss</span>
+                </div>
+                <p class="panel-detail uptime-color" id="sessionStartText">Session started --:--:--</p>
+            </div>
+        </div>
+
+    </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+
+@section Scripts {
+    <script src="~/js/systemlogs.js"></script>
+}

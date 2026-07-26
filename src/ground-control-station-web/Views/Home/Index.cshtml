@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "BALKAR Yer İstasyonu";
+}
+
+<div class="text-center mt-5">
+    <h2>BALKAR Otonom Kontrol Paneli</h2>
+    <hr />
+
+    <div class="mt-4">
+        <button class="btn btn-success btn-lg mx-2" onclick="komutGonder('ILERI')">İLERİ GİT</button>
+        <button class="btn btn-warning btn-lg mx-2" onclick="komutGonder('GERI')">GERİ GİT</button>
+        <button class="btn btn-danger btn-lg mx-2" onclick="komutGonder('DUR')">ACİL DUR (KILL SWITCH)</button>
+    </div>
+
+    <div class="mt-4">
+        <h5 id="durumMesaji" class="text-muted">Araç bağlantısı bekleniyor...</h5>
+    </div>
+</div>
+
+<script>
+    function komutGonder(komut) {
+        fetch('/Home/AracKomutGonder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'komut=' + komut
+        })
+        .then(response => response.json())
+        .then(data => {
+            const durumElementi = document.getElementById('durumMesaji');
+            if (data.success) {
+                durumElementi.style.color = "green";
+                durumElementi.innerText = "Bağlantı Başarılı: " + data.message;
+            } else {
+                durumElementi.style.color = "red";
+                durumElementi.innerText = "Hata: " + data.message;
+            }
+        });
+    }
+</script>

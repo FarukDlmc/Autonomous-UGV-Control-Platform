@@ -1,0 +1,224 @@
+﻿@{
+    ViewData["Title"] = "Control Panel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/controlpanel.css" asp-append-version="true" />
+}
+
+<div class="control-panel-wrapper">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+        <span class="topbar-brand">■ CONTROL PANEL</span>
+
+        <div class="conn-group">
+            <span class="conn-label">VEHICLE IP</span>
+            <input type="text"
+                   class="conn-input"
+                   id="vehicleIp"
+                   placeholder="192.168.1.100"
+                   autocomplete="off"
+                   spellcheck="false" />
+        </div>
+
+        <div class="conn-group">
+            <span class="conn-label">COM PORT</span>
+            <select class="conn-select" id="comPort">
+                <option value="">— SELECT —</option>
+                <option value="COM1">COM1</option>
+                <option value="COM2">COM2</option>
+                <option value="COM3">COM3</option>
+                <option value="COM4">COM4</option>
+                <option value="COM5">COM5</option>
+                <option value="/dev/ttyUSB0">/dev/ttyUSB0</option>
+                <option value="/dev/ttyUSB1">/dev/ttyUSB1</option>
+            </select>
+        </div>
+
+        <button class="btn-connect" id="connectBtn" onclick="handleConnect()">
+            CONNECT
+        </button>
+
+        <div class="conn-status-badge" id="connStatusBadge">
+            <span class="status-dot off" id="connStatusDot"></span>
+            <span id="connStatusText">DISCONNECTED</span>
+        </div>
+    </header>
+
+    <!-- PANEL GRID -->
+    <section class="panel-area">
+
+        <!-- ── COLUMN 1: MODE CONTROL ── -->
+        <div class="panel-card">
+            <div class="panel-title">MODE CONTROL</div>
+
+            <div class="mode-btn-group">
+                <button class="mode-btn autonomous" id="btnAutonomous" onclick="setMode('autonomous')">
+                    AUTONOMOUS MODE
+                    <div>
+                        <span class="mode-badge active-badge" id="badgeAutonomous">◆ ACTIVE</span>
+                    </div>
+                </button>
+
+                <button class="mode-btn manual inactive" id="btnManual" onclick="setMode('manual')">
+                    MANUAL OVERRIDE
+                    <div>
+                        <span class="mode-badge inactive-badge" id="badgeManual">◇ STANDBY</span>
+                    </div>
+                </button>
+            </div>
+
+            <div class="speed-section">
+                <div class="speed-header">
+                    <span class="speed-label">MAX SPEED</span>
+                    <span class="speed-value" id="speedDisplay">50%</span>
+                </div>
+                <input type="range"
+                       class="speed-slider"
+                       id="speedSlider"
+                       min="0" max="100" value="50"
+                       oninput="updateSpeed(this.value)" />
+                <div class="speed-ticks">
+                    <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+                </div>
+                <div class="speed-warning" id="speedWarning">
+                    <span class="warn-icon">◈</span>
+                    <span id="speedWarnText">NOMINAL SPEED RANGE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── COLUMN 2: SYSTEM TOGGLES ── -->
+        <div class="panel-card">
+            <div class="panel-title">SYSTEM TOGGLES</div>
+
+            <div class="toggle-list">
+                <!-- LIDAR -->
+                <div class="toggle-row" id="row-lidar">
+                    <div class="toggle-info">
+                        <div class="toggle-icon">📡</div>
+                        <div>
+                            <div class="toggle-name">LIDAR</div>
+                            <div class="toggle-status-text" id="status-lidar">OFFLINE</div>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-lidar" onchange="handleToggle('lidar', this.checked)" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- HEADLIGHTS -->
+                <div class="toggle-row" id="row-headlights">
+                    <div class="toggle-info">
+                        <div class="toggle-icon">💡</div>
+                        <div>
+                            <div class="toggle-name">HEADLIGHTS</div>
+                            <div class="toggle-status-text" id="status-headlights">OFFLINE</div>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-headlights" onchange="handleToggle('headlights', this.checked)" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- CAMERA -->
+                <div class="toggle-row" id="row-camera">
+                    <div class="toggle-info">
+                        <div class="toggle-icon">📷</div>
+                        <div>
+                            <div class="toggle-name">CAMERA</div>
+                            <div class="toggle-status-text" id="status-camera">OFFLINE</div>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-camera" onchange="handleToggle('camera', this.checked)" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- AI ENGINE -->
+                <div class="toggle-row" id="row-ai">
+                    <div class="toggle-info">
+                        <div class="toggle-icon">🤖</div>
+                        <div>
+                            <div class="toggle-name">AI ENGINE</div>
+                            <div class="toggle-status-text" id="status-ai">OFFLINE</div>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-ai" onchange="handleToggle('ai', this.checked)" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- mini telemetry strip -->
+            <div class="telem-strip" style="margin-top:20px;">
+                <div class="telem-item">UPTIME<span class="telem-val" id="telemUptime">00:00:00</span></div>
+                <div class="telem-item">SIGNAL<span class="telem-val" id="telemSignal">—</span></div>
+                <div class="telem-item">BATTERY<span class="telem-val" id="telemBatt">—</span></div>
+                <div class="telem-item">TEMP<span class="telem-val" id="telemTemp">—</span></div>
+            </div>
+        </div>
+
+        <!-- ── COLUMN 3: CRITICAL CONTROLS ── -->
+        <div class="panel-card critical">
+            <div class="panel-title">CRITICAL CONTROLS</div>
+
+            <div class="critical-controls">
+
+                <!-- KILL SWITCH -->
+                <div class="kill-wrap">
+                    <button class="btn-kill" id="btnKill" onclick="handleKillSwitch()">
+                        <span class="btn-kill-label">⚠ EMERGENCY</span>
+                        STOP<br>(KILL SWITCH)
+                    </button>
+                </div>
+
+                <!-- SECONDARY -->
+                <div class="secondary-btn-row">
+                    <button class="btn-secondary yellow" onclick="handleReboot()">
+                        ↺ REBOOT<br>PI 5
+                    </button>
+                    <button class="btn-secondary cyan" onclick="handleReturnHome()">
+                        ⌂ RETURN<br>TO HOME
+                    </button>
+                </div>
+
+                <!-- system log excerpt -->
+                <div style="background:#070b0f;border:1px solid #1e2d3d;border-radius:4px;padding:14px;font-family:var(--font-mono);font-size:9px;color:#3a5a6a;line-height:1.9;">
+                    <div style="color:#5a7a8a;margin-bottom:6px;letter-spacing:.12em;">// LAST EVENTS</div>
+                    <div id="eventLog">
+                        <span style="color:#2a4a5a">[ -- ]</span> Awaiting vehicle link...<br>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box danger-modal" id="modalBox">
+        <div class="modal-icon" id="modalIcon">⚠</div>
+        <div class="modal-title" id="modalTitle">CONFIRM ACTION</div>
+        <div class="modal-body" id="modalBody">Are you sure?</div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel-btn" onclick="closeModal()">CANCEL</button>
+            <button class="modal-btn confirm-btn" id="modalConfirmBtn" onclick="executeConfirmed()">CONFIRM</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+@section Scripts {
+    <script src="~/js/controlpanel.js" asp-append-version="true"></script>
+}

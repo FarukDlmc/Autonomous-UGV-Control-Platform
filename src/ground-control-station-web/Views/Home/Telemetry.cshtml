@@ -1,0 +1,183 @@
+﻿@{
+    ViewData["Title"] = "Telemetry";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/telemetry.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+}
+
+<div class="gcs-telemetry">
+
+    <!-- ═══════════════════════════════════
+         COL 1 — DATA CARDS
+    ═══════════════════════════════════ -->
+    <div class="tlm-col tlm-col--data">
+
+        <!-- GPS COORDINATES -->
+        <div class="tlm-card">
+            <div class="tlm-card__title">&#x2B21; GPS COORDINATES</div>
+            <div class="tlm-gps__row">
+                <span class="tlm-gps__lbl">Lat:</span>
+                <span class="tlm-gps__val" id="gpsLat">39.9207&deg;</span>
+            </div>
+            <div class="tlm-gps__row">
+                <span class="tlm-gps__lbl">Lon:</span>
+                <span class="tlm-gps__val" id="gpsLon">32.8541&deg;</span>
+            </div>
+            <div class="tlm-gps__precision">
+                Precision: <span id="gpsPrecision">+2.5m</span>
+            </div>
+        </div>
+
+        <!-- ALTITUDE -->
+        <div class="tlm-card tlm-card--grow">
+            <div class="tlm-alt__header">
+                <span class="tlm-card__title" style="border:none;margin:0;padding:0">&#x25B2; ALTITUDE</span>
+                <span class="tlm-alt__badge">Current</span>
+            </div>
+            <div class="tlm-alt__value" id="altValue">145.7 m</div>
+            <div class="tlm-alt__icon">&#x1F3D4;</div>
+            <div class="tlm-alt__meta">
+                Ref: <span>AMSL</span><br />
+                Barometric: <span id="baro">1013.2 hPa</span>
+            </div>
+        </div>
+
+        <!-- SATELLITES & LINK -->
+        <div class="tlm-card">
+            <div class="tlm-card__title">&#x1F4E1; SATELLITES &amp; LINK</div>
+            <div class="tlm-sat__body">
+                <div class="tlm-sat__tower">&#x1F4F6;</div>
+                <div class="tlm-sat__info">
+                    Active: <span class="tlm-sat__active" id="satActive">22</span><br />
+                    <span class="tlm-sat__sys-lbl">Systems:</span>
+                    <span class="tlm-sat__sys-val" id="satSystems">GPS (10) &nbsp; GLONASS (8) &nbsp; Galileo (4)</span>
+                </div>
+            </div>
+            <div class="tlm-sat__signal">
+                Signal: <span class="tlm-sat__sig-val" id="satSignal">Excellent</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════
+         COL 2 — MOTOR THRUST + UGV GRAPHIC
+    ═══════════════════════════════════ -->
+    <div class="tlm-col tlm-col--motor">
+        <div class="tlm-motor__title">&#x2699; MOTOR THRUST</div>
+
+        <div class="tlm-motor__stage">
+
+            <!-- MOTOR A -->
+            <div class="tlm-motor__bar-wrap">
+                <div class="tlm-motor__track">
+                    <div class="tlm-motor__fill tlm-motor__fill--a" id="fillA" style="height:45%"></div>
+                </div>
+                <div class="tlm-motor__lbl tlm-motor__lbl--cyan">MOTOR A</div>
+                <div class="tlm-motor__pwm">LEFT PWM: <span id="pwmA">1500</span></div>
+            </div>
+
+            <!-- UGV CHASSIS GRAPHIC -->
+            <div class="tlm-ugv__wrap">
+                <div class="tlm-ugv">
+                    <div class="tlm-ugv__arrow"></div>
+                    <div class="tlm-ugv__track tlm-ugv__track--l"></div>
+                    <div class="tlm-ugv__body">
+                        <div class="tlm-ugv__turret">
+                            <div class="tlm-ugv__turret-dot"></div>
+                        </div>
+                        <div class="tlm-ugv__dots">
+                            <div class="tlm-ugv__dot"></div>
+                            <div class="tlm-ugv__dot"></div>
+                            <div class="tlm-ugv__dot"></div>
+                        </div>
+                    </div>
+                    <div class="tlm-ugv__track tlm-ugv__track--r"></div>
+                </div>
+            </div>
+
+            <!-- MOTOR B -->
+            <div class="tlm-motor__bar-wrap">
+                <div class="tlm-motor__track">
+                    <div class="tlm-motor__fill tlm-motor__fill--b" id="fillB" style="height:65%"></div>
+                </div>
+                <div class="tlm-motor__lbl tlm-motor__lbl--green">MOTOR B</div>
+                <div class="tlm-motor__pwm">RIGHT PWM: <span id="pwmB">1650</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         COL 3 — ATTITUDE
+    ═══════════════════════════════════ -->
+    <div class="tlm-col tlm-col--attitude">
+
+        <div class="tlm-card tlm-card--compass">
+            <div class="tlm-card__title">&#x1F9ED; COMPASS</div>
+            <div class="tlm-compass__outer">
+                <div class="tlm-compass__ring">
+                    <div class="tlm-compass__ticks"></div>
+                    <span class="tlm-compass__cn tlm-compass__cn--n">N</span>
+                    <span class="tlm-compass__cn tlm-compass__cn--s">S</span>
+                    <span class="tlm-compass__cn tlm-compass__cn--e">E</span>
+                    <span class="tlm-compass__cn tlm-compass__cn--w">W</span>
+                    <div class="tlm-compass__needle" id="compassNeedle"></div>
+                    <div class="tlm-compass__center"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tlm-card tlm-pbar__card">
+            <div class="tlm-pbar__header">
+                <span class="tlm-pbar__title tlm-pbar__title--cyan">PITCH</span>
+                <span class="tlm-pbar__icon">&#x2708;</span>
+                <span class="tlm-pbar__deg">Degrees: <span id="pitchDeg">-5.1&deg;</span></span>
+            </div>
+            <div class="tlm-pbar__track">
+                <div class="tlm-pbar__fill tlm-pbar__fill--cyan" id="pitchFill" style="width:42%"></div>
+            </div>
+        </div>
+
+        <div class="tlm-card tlm-pbar__card">
+            <div class="tlm-pbar__header">
+                <span class="tlm-pbar__title tlm-pbar__title--green">ROLL</span>
+                <span class="tlm-pbar__icon">&#x1F6EC;</span>
+                <span class="tlm-pbar__deg">Degrees: <span id="rollDeg">22.4&deg;</span></span>
+            </div>
+            <div class="tlm-pbar__track">
+                <div class="tlm-pbar__fill tlm-pbar__fill--green" id="rollFill" style="width:62%"></div>
+            </div>
+        </div>
+
+        <div class="tlm-card tlm-pbar__card">
+            <div class="tlm-pbar__header">
+                <span class="tlm-pbar__title" style="color: #ff9d00;">AI VISION</span>
+                <span class="tlm-pbar__icon">&#x1F441;</span>
+                <span class="tlm-pbar__deg">Conf: <span id="tfScore">94.5%</span></span>
+            </div>
+            <div class="tlm-pbar__track">
+                <div class="tlm-pbar__fill" id="tfFill" style="width:94.5%; background: linear-gradient(90deg, transparent, #ff9d00);"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════
+         FOOTER — full width
+    ═══════════════════════════════════ -->
+    <div class="tlm-footer">
+        <span>SYSTEM_TIME: <span class="tlm-footer__val" id="sysTime">--:--:--</span></span>
+        <span>CPU_TEMP: <span class="tlm-footer__val" id="cpuTemp">45&deg;C</span></span>
+        <span>STATUS: <span class="tlm-footer__val tlm-footer__val--green">ONLINE</span></span>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+@section Scripts {
+    <script src="~/js/telemetry.js"></script>
+}
